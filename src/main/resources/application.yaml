@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: uploads-service
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
+  profiles:
+    active: ${PROFILE_ACTIVES:prd}
+
+server:
+  address: ${SERVER_ADDRESS:0.0.0.0}
+  port: ${SERVER_PORT:9003}
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: alpha
+    tags-sorter: alpha
+    doc-expansion: none
+  packages-to-scan: com.cbs.uploads-service.controllers
+  show-actuator: true
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+  paths-to-match: /**
+  use-management-port: false
+  writer-with-default-pretty-printer: true
+
+
+logging:
+  level:
+    web: debug
+    com.cbs.uploads_service: debug
+    io.minio: info
+
+management:
+  info:
+    build:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
