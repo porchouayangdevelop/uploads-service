@@ -14,9 +14,9 @@ import org.springframework.web.ErrorResponseException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -64,34 +64,53 @@ public class MinioService {
   public Response uploadFile(MultipartFile file, String dir) {
     try {
       String originFileName = file.getOriginalFilename();
-      String extension = getFileExtension(originFileName);
-      String fileName = UUID.randomUUID().toString() + extension;
 
+      String safeFilename = sanitizeFilename(originFileName);
+
+      LocalDate now = LocalDate.now();
+      String yearMonth = String.format("%d%02d", now.getYear(), now.getMonthValue());
+
+      String filePath;
       if (dir != null && !dir.isEmpty()) {
         dir = dir.replaceAll("^/+|/+$", "");
-        fileName = dir + "/" + fileName;
+        filePath = dir + "/" + yearMonth + "/" + safeFilename;
+      } else {
+        filePath = yearMonth + "/" + safeFilename;
       }
+
+      boolean isReplacement = fileExists(filePath);
+      if (isReplacement) {
+        log.info("File is exists, will be replaced: {}", filePath);
+      }
+
+//      String extension = getFileExtension(originFileName);
+//      String fileName = extension;
+//
+//      if (dir != null && !dir.isEmpty()) {
+//        dir = dir.replaceAll("^/+|/+$", "");
+//        fileName = dir + "/" + fileName;
+//      }
 
       client.putObject(
           PutObjectArgs.builder()
               .bucket(minioConfig.getBucketName())
-              .object(fileName)
+              .object(filePath)
               .stream(file.getInputStream(), file.getSize(), -1)
               .contentType(file.getContentType())
               .build()
       );
 
-      log.info("File upload successfully: {}", fileName);
+      log.info("File {} upload successfully: {}", isReplacement ? "replaced" : "uploaded", filePath);
 
-      String url = getPresignedUrl(fileName);
+      String url = getPresignedUrl(filePath);
 
       return Response.builder()
-          .fileName(fileName)
+          .fileName(filePath)
           .originalFileName(originFileName)
           .contentType(file.getContentType())
           .size(file.getSize())
           .url(url)
-          .message("File uploaded successfully")
+          .message(isReplacement ? "File replaced successfully" : "File uploaded successfully")
           .build();
 
     } catch (Exception e) {
@@ -100,6 +119,22 @@ public class MinioService {
     }
   }
 
+  private String sanitizeFilename(String fileName) {
+    if (fileName == null || fileName.isEmpty()) {
+      return "unnamed_file";
+    }
+
+    String sanitized = fileName
+        .replaceAll("[\\s]+", "_")                    // Replace spaces with underscore
+        .replaceAll("[^a-zA-Z0-9._-]", "")           // Remove special characters
+        .replaceAll("_+", "_")                        // Remove multiple underscores
+        .replaceAll("^[._-]+|[._-]+$", "");
+
+    if (sanitized.isEmpty() || sanitized.equals(".")) {
+      return "unnamed_file";
+    }
+    return sanitized;
+  }
 
   public List<Response> uploadFiles(MultipartFile[] files, String dir) {
     List<Response> responses = new ArrayList<>();
@@ -215,10 +250,13 @@ public class MinioService {
       return true;
 
     } catch (ErrorResponseException e) {
-      log.error("NoSuchKey {}", e.getMessage());
-      throw new RuntimeException("Error checking file existence: " + e.getMessage(), e);
+//      log.error("NoSuchKey {}", e.getMessage());
+//      throw new RuntimeException("Error checking file existence: " + e.getMessage(), e);
+      return false;
     } catch (Exception e) {
-      throw new RuntimeException("Error checking file existence: " + e.getMessage(), e);
+//      throw new RuntimeException("Error checking file existence: " + e.getMessage(), e);
+      log.warn("Could not check file existence, assuming not exists: {}", e.getMessage());
+      return false;
     }
   }
 
