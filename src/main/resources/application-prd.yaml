@@ -10,9 +10,9 @@ spring:
       add-mappings: true
 
 minio:
-  endpoint: http://10.1.11.179:9008
-  access-key: ${ACCESS_KEY:miniouser}
-  secret-key: ${SECRET-KEY:miniopassword}
+  endpoint: http://10.1.11.179:9005
+  access-key: ${ACCESS_KEY:minioadmin}
+  secret-key: ${SECRET-KEY:minioadmin@2026}
   bucket-name: ${BUCKET_NAME:fee-charge-bucket}
   secure: false
 
