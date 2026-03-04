@@ -9,7 +9,6 @@ spring:
     resources:
       add-mappings: true
 
-
 minio:
   endpoint: http://10.1.11.179:9008
   access-key: ${ACCESS_KEY:miniouser}

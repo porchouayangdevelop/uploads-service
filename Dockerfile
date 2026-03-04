@@ -16,13 +16,13 @@ FROM eclipse-temurin:17-alpine as production
 
 WORKDIR /app
 
-ARG JAR_FILE=target/*.war
+ARG JAR_FILE=target/*.jar
 
-COPY --from=build /app/target/*.war app.war
+COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 9999
 
-ENTRYPOINT ["java", "-jar", "app.war"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
 
 # docker build --tag sv-center:v0.0.01 .
 # docker build --tag apb.registry-img.com/api-uat/newcore/cbs-uploads-service:v1.0.01 .
