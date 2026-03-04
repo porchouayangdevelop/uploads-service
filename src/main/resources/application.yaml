@@ -11,7 +11,7 @@ spring:
 
 server:
   address: ${SERVER_ADDRESS:0.0.0.0}
-  port: ${SERVER_PORT:9003}
+  port: ${SERVER_PORT:9080}
 
 springdoc:
   api-docs:

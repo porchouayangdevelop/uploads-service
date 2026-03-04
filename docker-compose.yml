@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "9003:9003"
+      - "9080:9080"
     environment:
       - PROFILE_ACTIVE=prod
       - DB_HOST=host.docker.internal
