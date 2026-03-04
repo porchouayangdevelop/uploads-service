@@ -23,13 +23,13 @@ springdoc:
     operations-sorter: alpha
     tags-sorter: alpha
     doc-expansion: none
-  packages-to-scan: com.cbs.uploads-service.controllers
-  show-actuator: true
-  default-produces-media-type: application/json
-  default-consumes-media-type: application/json
-  paths-to-match: /**
-  use-management-port: false
-  writer-with-default-pretty-printer: true
+#  packages-to-scan: com.cbs.uploads-service.controllers
+#  show-actuator: true
+#  default-produces-media-type: application/json
+#  default-consumes-media-type: application/json
+#  paths-to-match: /**
+#  use-management-port: false
+#  writer-with-default-pretty-printer: true
 
 
 logging:

@@ -1,0 +1,36 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9003:9003"
+    environment:
+      - PROFILE_ACTIVE=prod
+      - DB_HOST=host.docker.internal
+    restart: unless-stopped
+    networks:
+      app-network:
+        aliases:
+          - uploads-service
+    volumes:
+      - logs:/logs/app/logs
+      - uploads:/uploads/app/uploads
+
+volumes:
+    logs:
+      driver: local
+      driver_opts:
+        type: none
+        o: bind
+        device: /data/logs/uploads-service/logs
+    uploads:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: /data/logs/uploads-service/uploads
+
+networks:
+  app-network:
+    driver: bridge

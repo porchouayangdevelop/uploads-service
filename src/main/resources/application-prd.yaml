@@ -11,7 +11,7 @@ spring:
 
 
 minio:
-  endpoint: http://10.1.11.179:9002
+  endpoint: http://10.1.11.179:9005
   access-key: ${ACCESS_KEY:minioadmin}
   secret-key: ${SECRET-KEY:minioadmin@2026}
   bucket-name: ${BUCKET_NAME:fee-charge-bucket}
@@ -25,8 +25,11 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     enabled: true
-  packages-to-scan: com.cbs.uploads-service.controllers
-  show-actuator: true
+    tags-sorter: alpha
+    operations-sorter: alpha
+    doc-expansion: none
+#  packages-to-scan: com.cbs.uploads-service.controllers
+#  show-actuator: true
 
 management:
   endpoints:

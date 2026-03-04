@@ -5,6 +5,9 @@ import com.cbs.uploads_service.response.Response;
 import com.cbs.uploads_service.services.MinioService;
 import io.minio.StatObjectResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,25 +42,28 @@ public class UploadController {
    * Upload single file
    * POST /api/files/upload
    */
-  @PostMapping("/file")
+  @PostMapping(value = "/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @Operation(summary = "Upload single file", description = "upload file", tags = "Upload file API")
   @ApiResponses(value = {
       @ApiResponse(
-          responseCode = "200",
-          description = "Successfully upload file",
+          responseCode = "200", description = "Successfully upload file",
           content = @io.swagger.v3.oas.annotations.media.Content(
+              schema = @Schema(implementation = Response.class),
               mediaType = MediaType.APPLICATION_JSON_VALUE
           )
       ),
       @ApiResponse(
-          responseCode = "500",
-          description = "Internal Server Error"
+          responseCode = "400", description = "Bad request - no file provided"
+      ),
+      @ApiResponse(
+          responseCode = "500", description = "Internal Server Error"
       )
-
-
   })
   public ResponseEntity<Response> uploadFile(
+      @Parameter(description = "File to upload", required = true)
       @RequestParam("file") MultipartFile file,
+
+      @Parameter(description = "Optional dir path (e.g., 'document')")
       @RequestParam(value = "dir", required = false) String dir
   ) {
 
@@ -76,9 +82,27 @@ public class UploadController {
    * Upload multiple files
    * POST /api/files/upload/multiple
    */
-  @PostMapping("/files")
+  @PostMapping(value = "/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @Operation(
+      summary = "Upload multiple files",
+      description = "Upload multiple files at once to MinIO storage. All files are organized in year/month subdirectories.",
+      tags = "Upload file API"
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Files uploaded successfully",
+          content = @io.swagger.v3.oas.annotations.media.Content(
+              schema = @Schema(implementation = Response.class),
+              mediaType = MediaType.APPLICATION_JSON_VALUE
+          )),
+      @ApiResponse(responseCode = "400", description = "Bad request - no files provided"),
+      @ApiResponse(responseCode = "500", description = "Internal server error")
+  })
+
   public ResponseEntity<List<Response>> uploadFiles(
-      @RequestParam(value = "files") MultipartFile[] files,
+      @Parameter(description = "Files to upload", required = true)
+      @RequestParam("files") MultipartFile[] files,
+
+      @Parameter(description = "Optional dir path")
       @RequestParam(value = "dir", required = false) String dir
   ) {
     if (files.length == 0) {
@@ -93,6 +117,15 @@ public class UploadController {
    * Download file
    * GET /api/files/download/{fileName}
    */
+  @Operation(
+      summary = "Download a file",
+      description = "Download a file from MinIO storage as an attachment"
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "File downloaded successfully",
+          content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE)),
+      @ApiResponse(responseCode = "404", description = "File not found")
+  })
   @GetMapping("/download/**")
   public ResponseEntity<byte[]> downloadFile(
       @RequestParam("path") String filePath
@@ -124,6 +157,14 @@ public class UploadController {
    * View file (inline display)
    * GET /api/files/view?path=xxx
    */
+  @Operation(
+      summary = "View a file inline",
+      description = "View a file directly in the browser (useful for images, PDFs, etc.)"
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "File retrieved successfully"),
+      @ApiResponse(responseCode = "404", description = "File not found")
+  })
   @GetMapping("/view")
   public ResponseEntity<byte[]> viewFile(@RequestParam("path") String filePath) {
     try {
@@ -151,6 +192,15 @@ public class UploadController {
    * Delete file
    * DELETE /api/files/delete?path=xxx
    */
+  @Operation(
+      summary = "Delete a file",
+      description = "Permanently delete a file from MinIO storage"
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "File deleted successfully"),
+      @ApiResponse(responseCode = "404", description = "File not found"),
+      @ApiResponse(responseCode = "500", description = "Internal server error")
+  })
   @DeleteMapping("/delete")
   public ResponseEntity<Map<String, String>> deleteFile(@RequestParam("path") String filePath) {
     Map<String, String> res = new HashMap<>();
@@ -178,6 +228,14 @@ public class UploadController {
    * List all files
    * GET /api/files/list
    */
+  @Operation(
+      summary = "List all files",
+      description = "List all files in the bucket, optionally filtered by prefix (folder path)"
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Files listed successfully"),
+      @ApiResponse(responseCode = "500", description = "Internal server error")
+  })
   @GetMapping("/files")
   public ResponseEntity<List<FileInfo>> listFiles(@RequestParam(value = "prefix", required = false) String prefix) {
     List<FileInfo> files = service.listFiles(prefix);
@@ -189,6 +247,14 @@ public class UploadController {
    * Get file info/metadata
    * GET /api/files/info?path=xxx
    */
+  @Operation(
+      summary = "Get file information",
+      description = "Get metadata and details about a specific file"
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "File info retrieved successfully"),
+      @ApiResponse(responseCode = "404", description = "File not found")
+  })
   @GetMapping("/file/info")
   public ResponseEntity<Map<String, Object>> getFileInfo(
       @RequestParam("path") String filePath
@@ -216,6 +282,15 @@ public class UploadController {
    * Get presigned URL for direct access
    * GET /api/files/presigned-url?path=xxx
    */
+  @Operation(
+      summary = "Get presigned download URL",
+      description = "Generate a presigned URL for direct file access (valid for 7 days)"
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Presigned URL generated successfully"),
+      @ApiResponse(responseCode = "404", description = "File not found"),
+      @ApiResponse(responseCode = "500", description = "Internal server error")
+  })
   @GetMapping("/presigned-url")
   public ResponseEntity<Map<String, String>> getPresignedUrl(
       @RequestParam("path") String filePath
@@ -243,6 +318,15 @@ public class UploadController {
    * Get presigned URL for upload (client-side upload)
    * POST /api/files/presigned-upload
    */
+  @Operation(
+      summary = "Get presigned upload URL",
+      description = "Generate a presigned URL for client-side direct upload to MinIO (valid for 1 hour). " +
+          "Use PUT request to upload file directly to the returned URL."
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Presigned upload URL generated successfully"),
+      @ApiResponse(responseCode = "500", description = "Internal server error")
+  })
   @PostMapping("/presigned-upload")
   public ResponseEntity<Map<String, String>> getPresignedUploadUrl(
       @RequestParam("fileName") String fileName,
@@ -274,6 +358,11 @@ public class UploadController {
    * Health check
    * GET /api/files/health
    */
+  @Operation(
+      summary = "Health check",
+      description = "Check if the service is running"
+  )
+  @ApiResponse(responseCode = "200", description = "Service is healthy")
   @GetMapping("/health")
   public ResponseEntity<Map<String, String>> healthCheck() {
     Map<String, String> response = new HashMap<>();

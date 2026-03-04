@@ -5,7 +5,6 @@ import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.servers.Server;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -46,7 +45,15 @@ public class OpenApiConfig {
         .info(new Info()
             .title("Uploads Service")
             .version("1.0.0")
-            .description("API documentation for Uploads Service")
+            .description("API documentation for Uploads Service. \n \n" +
+                "## Features\n" +
+                "- Upload single or multi files \n" +
+                "- Automatic year/month dir organization\n" +
+                "- File replacement if exists\n" +
+                "- Download and view file\n" +
+                "- Generate presigned URLs\n" +
+                "- List and delete files"
+            )
             .contact(new Contact()
                 .name("POR")
                 .url("pordev.com")
