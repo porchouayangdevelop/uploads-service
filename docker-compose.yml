@@ -7,7 +7,7 @@ services:
       - "9080:9080"
     environment:
       - PROFILE_ACTIVES=prd
-      - ENDPOINT=${ENDPOINT:http://10.1.11.179:9008}
+      - ENDPOINT=http://10.1.11.179:9008
       - ACCESS_KEY=${ACCESS_KEY:miniouser}
       - SECRET-KEY=${SECRET-KEY:miniopassword}
       - BUCKET_NAME=${BUCKET_NAME:fee-charge-bucket}
