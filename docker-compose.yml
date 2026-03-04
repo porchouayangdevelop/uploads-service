@@ -6,8 +6,11 @@ services:
     ports:
       - "9080:9080"
     environment:
-      - PROFILE_ACTIVE=prod
-      - DB_HOST=host.docker.internal
+      - PROFILE_ACTIVES=prd
+      - ENDPOINT=${ENDPOINT:http://10.1.11.179:9008}
+      - ACCESS_KEY=${ACCESS_KEY:miniouser}
+      - SECRET-KEY=${SECRET-KEY:miniopassword}
+      - BUCKET_NAME=${BUCKET_NAME:fee-charge-bucket}
     restart: unless-stopped
     networks:
       app-network:

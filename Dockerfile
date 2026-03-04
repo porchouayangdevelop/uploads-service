@@ -10,6 +10,7 @@ COPY src ./src
 
 RUN mvn clean package -DskipTests
 
+ENV PROFILE_ACTIVES=prd
 
 FROM eclipse-temurin:17-alpine as production
 
