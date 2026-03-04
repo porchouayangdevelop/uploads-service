@@ -11,7 +11,7 @@ spring:
 
 
 minio:
-  endpoint: http://10.1.11.179:9005
+  endpoint: http://10.1.11.179:9008
   access-key: ${ACCESS_KEY:miniouser}
   secret-key: ${SECRET-KEY:miniopassword}
   bucket-name: ${BUCKET_NAME:fee-charge-bucket}
