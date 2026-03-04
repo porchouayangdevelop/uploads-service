@@ -8,9 +8,9 @@ services:
     environment:
       - PROFILE_ACTIVES=prd
       - ENDPOINT=http://10.1.11.179:9008
-      - ACCESS_KEY=${ACCESS_KEY:miniouser}
-      - SECRET-KEY=${SECRET-KEY:miniopassword}
-      - BUCKET_NAME=${BUCKET_NAME:fee-charge-bucket}
+      - ACCESS_KEY=miniouser
+      - SECRET-KEY=miniopassword
+      - BUCKET_NAME=fee-charge-bucket
     restart: unless-stopped
     networks:
       app-network:
